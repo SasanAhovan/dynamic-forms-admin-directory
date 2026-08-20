@@ -55,29 +55,91 @@ function populateOrganizations(filter=""){
  if(previous&&organizations.includes(previous)&&(!q||previous.toLowerCase().includes(q)))organization.value=previous;
 }
 function showAdmins(org){
- if(!org){results.innerHTML='<div class="empty">Select a department above to see its administrators.</div>';return}
- const admins=records.filter(r=>r.OrgName===org).map(r=>({first:r.FirstName,last:r.LastName,superAdmin:String(r.SuperAdmin).toLowerCase()==="yes"}));
- if(!admins.length){results.innerHTML='<div class="empty">No administrators were found for this organization.</div>';return}
- admins.sort((a,b)=>a.superAdmin!==b.superAdmin?(a.superAdmin?1:-1):(a.last+" "+a.first).localeCompare(b.last+" "+b.first));
- const cards=admins.map(p=>`<div class="admin ${p.superAdmin?"super":""}"><div class="avatar">${escapeHtml((p.first[0]||"")+(p.last[0]||""))}</div><div><div class="name">${escapeHtml(p.first+" "+p.last)}</div><div class="role">Dynamic Forms Administrator</div>${p.superAdmin?'<div class="super-admin-badge">Super Admin</div>':""}</div></div>`).join("");
- const regular=admins.some(p=>!p.superAdmin);
- const superCount=admins.filter(p=>p.superAdmin).length;
- results.innerHTML=`<div class="result-header"><h2 class="org-name">${escapeHtml(org)}</h2><div class="count">${admins.length} administrator${admins.length===1?"":"s"}</div></div>${regular?'<div class="section-title">Administrators</div>':""}<div class="admins">${cards}</div>`;
+  if(!org){
+    results.innerHTML='<div class="empty">Select a department above to see its administrators.</div>';
+    return;
+  }
+
+  const admins=records
+    .filter(r=>r.OrgName===org)
+    .map(r=>({
+      first:r.FirstName,
+      last:r.LastName,
+      email:r.Email
+    }));
+
+  if(!admins.length){
+    results.innerHTML='<div class="empty">No active administrators were found for this organization.</div>';
+    return;
+  }
+
+  // Super Admin = a person assigned to more than 20 distinct organizations.
+  const orgCounts=new Map();
+  records.forEach(r=>{
+    const key=(r.FirstName+" "+r.LastName).trim().toLowerCase();
+    if(!orgCounts.has(key)) orgCounts.set(key,new Set());
+    orgCounts.get(key).add(r.OrgName);
+  });
+
+  admins.forEach(p=>{
+    const key=(p.first+" "+p.last).trim().toLowerCase();
+    p.superAdmin=(orgCounts.get(key)?.size || 0)>20;
+  });
+
+  // Regular admins first; Super Admins always appear at the bottom.
+  admins.sort((a,b)=>{
+    if(a.superAdmin!==b.superAdmin) return a.superAdmin?1:-1;
+    return (a.last+" "+a.first).localeCompare(b.last+" "+b.first);
+  });
+
+  const cards=admins.map(p=>`
+    <div class="admin ${p.superAdmin?"super":""}">
+      <div class="avatar">${escapeHtml((p.first[0]||"")+(p.last[0]||""))}</div>
+      <div>
+        <div class="name">${escapeHtml(p.first+" "+p.last)}</div>
+        <div class="role">${escapeHtml(p.email || "Dynamic Forms Administrator")}</div>
+        ${p.superAdmin?'<div class="super-admin-badge">Super Admin</div>':""}
+      </div>
+    </div>
+  `).join("");
+
+  const regular=admins.some(p=>!p.superAdmin);
+  results.innerHTML=`
+    <div class="result-header">
+      <h2 class="org-name">${escapeHtml(org)}</h2>
+      <div class="count">${admins.length} administrator${admins.length===1?"":"s"}</div>
+    </div>
+    ${regular?'<div class="section-title">Administrators</div>':""}
+    <div class="admins">${cards}</div>
+  `;
 }
+
 async function loadCSV(){
- try{
-  const response=await fetch("admins.csv",{cache:"no-store"});if(!response.ok)throw new Error("admins.csv not found");
-  records=parseCSV(await response.text());
-  const required=["OrgName","FirstName","LastName","SuperAdmin","Active"];
-  if(!records.length||required.some(h=>!(h in records[0])))throw new Error("CSV must contain OrgName, FirstName, LastName, SuperAdmin, and Active columns.");
+  try{
+    const response=await fetch("admins.csv",{cache:"no-store"});
+    if(!response.ok)throw new Error("admins.csv not found");
 
-  // Only Active = Yes users are included in the directory.
-  records=records.filter(r=>String(r.Active).trim().toLowerCase()==="yes");
+    records=parseCSV(await response.text());
 
-  organizations=[...new Set(records.map(r=>r.OrgName).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
-  populateOrganizations();results.innerHTML='<div class="empty">Select a department above to see its administrators.</div>';
- }catch(e){console.error(e);results.innerHTML='<div class="empty">Unable to load <strong>admins.csv</strong>. Make sure it is in the same GitHub folder as index.html.</div>'}
+    const required=["LastName","FirstName","Email","Active","OrgName"];
+    if(!records.length||required.some(h=>!(h in records[0]))){
+      throw new Error("CSV must contain LastName, FirstName, Email, Active, and OrgName columns.");
+    }
+
+    // Only Active = Yes users appear in the directory.
+    records=records.filter(r=>String(r.Active).trim().toLowerCase()==="active");
+
+    organizations=[...new Set(records.map(r=>r.OrgName).filter(Boolean))]
+      .sort((a,b)=>a.localeCompare(b));
+
+    populateOrganizations();
+    results.innerHTML='<div class="empty">Select a department above to see its administrators.</div>';
+  }catch(e){
+    console.error(e);
+    results.innerHTML='<div class="empty">Unable to load <strong>admins.csv</strong>. Make sure it is in the same GitHub folder as index.html.</div>';
+  }
 }
+
 search.addEventListener("input",()=>{populateOrganizations(search.value);if(organization.value)showAdmins(organization.value)});
 organization.addEventListener("change",()=>showAdmins(organization.value));
 loadCSV();
