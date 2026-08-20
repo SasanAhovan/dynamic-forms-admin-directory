@@ -15,178 +15,31 @@
     --bg: #f5f7fa;
     --white: #fff;
   }
-
   * { box-sizing: border-box; }
-
-  body {
-    margin: 0;
-    font-family: "Segoe UI", Arial, sans-serif;
-    color: var(--text);
-    background: var(--bg);
-  }
-
-  .page {
-    max-width: 920px;
-    margin: 0 auto;
-    padding: 42px 20px 60px;
-  }
-
-  .header {
-    margin-bottom: 24px;
-  }
-
-  .eyebrow {
-    color: var(--blue);
-    font-size: 13px;
-    font-weight: 700;
-    letter-spacing: .08em;
-    text-transform: uppercase;
-    margin-bottom: 7px;
-  }
-
-  h1 {
-    margin: 0;
-    color: var(--navy);
-    font-size: 30px;
-    line-height: 1.2;
-  }
-
-  .intro {
-    margin: 9px 0 0;
-    color: var(--muted);
-    font-size: 16px;
-  }
-
-  .controls {
-    background: var(--white);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 20px;
-    box-shadow: 0 2px 8px rgba(31, 58, 95, .05);
-  }
-
-  label {
-    display: block;
-    font-size: 14px;
-    font-weight: 600;
-    margin-bottom: 7px;
-    color: var(--navy);
-  }
-
-  input, select {
-    width: 100%;
-    height: 46px;
-    border: 1px solid #cbd5e1;
-    border-radius: 8px;
-    padding: 0 13px;
-    background: #fff;
-    color: var(--text);
-    font: inherit;
-    outline: none;
-  }
-
-  input:focus, select:focus {
-    border-color: var(--blue);
-    box-shadow: 0 0 0 3px rgba(47,111,174,.12);
-  }
-
-  .select-label {
-    margin-top: 16px;
-  }
-
-  .results {
-    margin-top: 22px;
-  }
-
-  .empty {
-    background: var(--white);
-    border: 1px dashed var(--border);
-    border-radius: 12px;
-    padding: 36px 20px;
-    text-align: center;
-    color: var(--muted);
-  }
-
-  .result-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: end;
-    gap: 12px;
-    margin-bottom: 12px;
-  }
-
-  .org-name {
-    margin: 0;
-    color: var(--navy);
-    font-size: 21px;
-    line-height: 1.3;
-  }
-
-  .count {
-    color: var(--muted);
-    font-size: 14px;
-    white-space: nowrap;
-  }
-
-  .admins {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px;
-  }
-
-  .admin {
-    background: var(--white);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 14px 16px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-
-  .avatar {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: var(--blue-light);
-    color: var(--blue);
-    display: grid;
-    place-items: center;
-    flex: 0 0 40px;
-    font-size: 13px;
-    font-weight: 700;
-  }
-
-  .name {
-    font-size: 16px;
-    font-weight: 600;
-  }
-
-  .role {
-    color: var(--muted);
-    font-size: 13px;
-    margin-top: 2px;
-  }
-
-  .super-admin-badge {
-    display: inline-block;
-    margin-top: 6px;
-    padding: 3px 8px;
-    border-radius: 999px;
-    background: #eef2ff;
-    color: #4f46e5;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: .02em;
-  }
-
-  .footer {
-    margin-top: 24px;
-    color: var(--muted);
-    font-size: 12px;
-    text-align: center;
-  }
-
+  body { margin: 0; font-family: "Segoe UI", Arial, sans-serif; color: var(--text); background: var(--bg); }
+  .page { max-width: 920px; margin: 0 auto; padding: 42px 20px 60px; }
+  .header { margin-bottom: 24px; }
+  .eyebrow { color: var(--blue); font-size: 13px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; margin-bottom: 7px; }
+  h1 { margin: 0; color: var(--navy); font-size: 30px; line-height: 1.2; }
+  .intro { margin: 9px 0 0; color: var(--muted); font-size: 16px; }
+  .controls { background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(31, 58, 95, .05); }
+  label { display: block; font-size: 14px; font-weight: 600; margin-bottom: 7px; color: var(--navy); }
+  input, select { width: 100%; height: 46px; border: 1px solid #cbd5e1; border-radius: 8px; padding: 0 13px; background: #fff; color: var(--text); font: inherit; outline: none; }
+  input:focus, select:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(47,111,174,.12); }
+  .select-label { margin-top: 16px; }
+  .results { margin-top: 22px; }
+  .empty { background: var(--white); border: 1px dashed var(--border); border-radius: 12px; padding: 36px 20px; text-align: center; color: var(--muted); }
+  .result-header { display: flex; justify-content: space-between; align-items: end; gap: 12px; margin-bottom: 12px; }
+  .org-name { margin: 0; color: var(--navy); font-size: 21px; line-height: 1.3; }
+  .count { color: var(--muted); font-size: 14px; white-space: nowrap; }
+  .admins { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .admin { background: var(--white); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; display: flex; align-items: center; gap: 12px; }
+  .avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--blue-light); color: var(--blue); display: grid; place-items: center; flex: 0 0 40px; font-size: 13px; font-weight: 700; }
+  .name { font-size: 16px; font-weight: 600; }
+  .role { color: var(--muted); font-size: 13px; margin-top: 2px; }
+  .super-admin-badge { display: inline-block; margin-top: 6px; padding: 3px 8px; border-radius: 999px; background: #eef2ff; color: #4f46e5; font-size: 11px; font-weight: 700; letter-spacing: .02em; }
+  .error { background: #fff7f7; border: 1px solid #f0caca; color: #a33a3a; border-radius: 12px; padding: 18px; }
+  .footer { margin-top: 24px; color: var(--muted); font-size: 12px; text-align: center; }
   @media (max-width: 650px) {
     .page { padding: 28px 14px 45px; }
     h1 { font-size: 25px; }
@@ -221,33 +74,38 @@
 </main>
 
 <script>
-let superAdmins = new Set();
-
-async function loadSuperAdmins() {
-  try {
-    const response = await fetch("super-admins.json");
-    if (!response.ok) throw new Error("Could not load super-admins.json");
-    const names = await response.json();
-    superAdmins = new Set(names.map(name => String(name).trim()).filter(Boolean));
-  } catch (error) {
-    console.error(error);
-    superAdmins = new Set();
-  }
-}
-
 let adminData = {};
 let superAdmins = new Set();
+let organizations = [];
+
+const search = document.getElementById("search");
+const organization = document.getElementById("organization");
+const results = document.getElementById("results");
+
+function escapeHtml(value) {
+  return String(value).replace(/[&<>"']/g, ch => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;"
+  }[ch]));
+}
+
+function initials(person) {
+  return ((person.first || "").charAt(0) + (person.last || "").charAt(0)).toUpperCase();
+}
 
 async function loadDirectoryData() {
   const [adminsResponse, superResponse, orgResponse] = await Promise.all([
-    fetch("admins.json"),
-    fetch("super-admins.json"),
-    fetch("org-names.json")
+    fetch("admins.json", { cache: "no-store" }),
+    fetch("super-admins.json", { cache: "no-store" }),
+    fetch("org-names.json", { cache: "no-store" })
   ]);
 
-  if (!adminsResponse.ok || !superResponse.ok || !orgResponse.ok) {
-    throw new Error("Missing admins.json, super-admins.json, or org-names.json");
-  }
+  if (!adminsResponse.ok) throw new Error(`admins.json could not be loaded (${adminsResponse.status})`);
+  if (!superResponse.ok) throw new Error(`super-admins.json could not be loaded (${superResponse.status})`);
+  if (!orgResponse.ok) throw new Error(`org-names.json could not be loaded (${orgResponse.status})`);
 
   const [data, superList, orgList] = await Promise.all([
     adminsResponse.json(),
@@ -257,30 +115,13 @@ async function loadDirectoryData() {
 
   adminData = data;
   superAdmins = new Set(
-    superList.map(x => String(x).trim()).filter(Boolean)
+    superList.map(name => String(name).trim()).filter(Boolean)
   );
 
-  // org-names.json is the master list of organizations shown in the directory.
   organizations = orgList
-    .map(x => String(x).trim())
+    .map(org => String(org).trim())
     .filter(Boolean)
     .filter((org, index, list) => list.indexOf(org) === index);
-}
-
-
-const search = document.getElementById("search");
-const organization = document.getElementById("organization");
-const results = document.getElementById("results");
-let organizations = [];
-
-function escapeHtml(value) {
-  return String(value).replace(/[&<>"']/g, ch => ({
-    "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;"
-  }[ch]));
-}
-
-function initials(person) {
-  return ((person.first || "").charAt(0) + (person.last || "").charAt(0)).toUpperCase();
 }
 
 function populateOrganizations(filter = "") {
@@ -298,8 +139,11 @@ function populateOrganizations(filter = "") {
       organization.appendChild(option);
     });
 
-  if (previous && organizations.includes(previous) &&
-      (!query || previous.toLowerCase().includes(query))) {
+  if (
+    previous &&
+    organizations.includes(previous) &&
+    (!query || previous.toLowerCase().includes(query))
+  ) {
     organization.value = previous;
   }
 }
@@ -311,63 +155,83 @@ function showAdmins(org) {
   }
 
   const entry = adminData[org] || { admins: [], superAdmins: [] };
-  const admins = [...(entry.admins || []), ...(entry.superAdmins || [])];
+
+  // Regular admins first, Super Admins last.
+  const regularAdmins = Array.isArray(entry.admins) ? entry.admins : [];
+  const superAdminPeople = Array.isArray(entry.superAdmins) ? entry.superAdmins : [];
+
+  const sortedRegular = [...regularAdmins].sort((a, b) =>
+    `${a.last} ${a.first}`.localeCompare(`${b.last} ${b.first}`)
+  );
+
+  const sortedSuper = [...superAdminPeople].sort((a, b) =>
+    `${a.last} ${a.first}`.localeCompare(`${b.last} ${b.first}`)
+  );
+
+  const admins = [...sortedRegular, ...sortedSuper];
 
   if (!admins.length) {
-    results.innerHTML = '<div class="empty">No administrators were found for this organization.</div>';
+    results.innerHTML = `
+      <div class="result-header">
+        <h2 class="org-name">${escapeHtml(org)}</h2>
+        <div class="count">0 administrators</div>
+      </div>
+      <div class="empty">No administrators were found for this organization.</div>
+    `;
     return;
   }
 
-  // Keep regular admins first, then Super Admins at the bottom.
-  const sortedAdmins = [...admins].sort((a, b) => {
-    const aIsSuper = superAdmins.has(a.first + " " + a.last);
-    const bIsSuper = superAdmins.has(b.first + " " + b.last);
+  const cards = admins.map(person => {
+    const isSuper = superAdmins.has(`${person.first} ${person.last}`) ||
+                    superAdminPeople.some(p => p.first === person.first && p.last === person.last);
 
-    if (aIsSuper !== bIsSuper) return aIsSuper ? 1 : -1;
-
-    return (a.last + " " + a.first).localeCompare(
-      b.last + " " + b.first
-    );
-  });
-
-  const cards = sortedAdmins.map(person => `
-    <div class="admin">
-      <div class="avatar">${escapeHtml(initials(person))}</div>
-      <div>
-        <div class="name">${escapeHtml(person.first + " " + person.last)}</div>
-        <div class="role">Dynamic Forms Administrator</div>
-        ${superAdmins.has(person.first + " " + person.last) ? '<div class="super-admin-badge">Super Admin</div>' : ''}
+    return `
+      <div class="admin">
+        <div class="avatar">${escapeHtml(initials(person))}</div>
+        <div>
+          <div class="name">${escapeHtml(person.first + " " + person.last)}</div>
+          <div class="role">Dynamic Forms Administrator</div>
+          ${isSuper ? '<div class="super-admin-badge">Super Admin</div>' : ''}
+        </div>
       </div>
-    </div>
-  `).join("");
+    `;
+  }).join("");
 
   results.innerHTML = `
     <div class="result-header">
-      <div>
-        <h2 class="org-name">${escapeHtml(org)}</h2>
-      </div>
+      <div><h2 class="org-name">${escapeHtml(org)}</h2></div>
       <div class="count">${admins.length} administrator${admins.length === 1 ? "" : "s"}</div>
     </div>
     <div class="admins">${cards}</div>
   `;
 }
 
-loadSuperAdmins().then(() => {
-  loadDirectoryData().then(() => {
-  populateOrganizations();
-
-  search.addEventListener("input", () => {
-    populateOrganizations(search.value);
-    if (organization.value) showAdmins(organization.value);
-  });
-
-  organization.addEventListener("change", () => {
-    showAdmins(organization.value);
-  });
-}).catch(error => {
-  console.error(error);
-  results.innerHTML = '<div class="empty">Unable to load the administrator directory. Make sure <strong>admins.json</strong> and <strong>super-admins.json</strong> are in the same folder.</div>';
+search.addEventListener("input", () => {
+  populateOrganizations(search.value);
+  if (organization.value) showAdmins(organization.value);
 });
+
+organization.addEventListener("change", () => {
+  showAdmins(organization.value);
+});
+
+// Load all three editable files, then populate the dropdown.
+loadDirectoryData()
+  .then(() => {
+    populateOrganizations();
+  })
+  .catch(error => {
+    console.error(error);
+    results.innerHTML = `
+      <div class="error">
+        <strong>Unable to load the administrator directory.</strong><br>
+        ${escapeHtml(error.message)}
+        <br><br>
+        Make sure <strong>admins.json</strong>, <strong>super-admins.json</strong>,
+        and <strong>org-names.json</strong> are in the same GitHub Pages folder as this file.
+      </div>
+    `;
+  });
 </script>
 </body>
 </html>
