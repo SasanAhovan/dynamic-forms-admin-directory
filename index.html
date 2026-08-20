@@ -239,19 +239,32 @@ let adminData = {};
 let superAdmins = new Set();
 
 async function loadDirectoryData() {
-  const [adminsResponse, superResponse] = await Promise.all([
+  const [adminsResponse, superResponse, orgResponse] = await Promise.all([
     fetch("admins.json"),
-    fetch("super-admins.json")
+    fetch("super-admins.json"),
+    fetch("org-names.json")
   ]);
-  if (!adminsResponse.ok || !superResponse.ok) {
-    throw new Error("Missing admins.json or super-admins.json");
+
+  if (!adminsResponse.ok || !superResponse.ok || !orgResponse.ok) {
+    throw new Error("Missing admins.json, super-admins.json, or org-names.json");
   }
-  const [data, superList] = await Promise.all([
+
+  const [data, superList, orgList] = await Promise.all([
     adminsResponse.json(),
-    superResponse.json()
+    superResponse.json(),
+    orgResponse.json()
   ]);
+
   adminData = data;
-  superAdmins = new Set(superList.map(x => String(x).trim()).filter(Boolean));
+  superAdmins = new Set(
+    superList.map(x => String(x).trim()).filter(Boolean)
+  );
+
+  // org-names.json is the master list of organizations shown in the directory.
+  organizations = orgList
+    .map(x => String(x).trim())
+    .filter(Boolean)
+    .filter((org, index, list) => list.indexOf(org) === index);
 }
 
 
@@ -341,7 +354,6 @@ function showAdmins(org) {
 
 loadSuperAdmins().then(() => {
   loadDirectoryData().then(() => {
-  organizations = Object.keys(adminData).sort((a, b) => a.localeCompare(b));
   populateOrganizations();
 
   search.addEventListener("input", () => {
