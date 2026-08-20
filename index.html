@@ -5,233 +5,82 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Dynamic Forms Admin Directory</title>
 <style>
-  :root {
-    --navy: #1f3a5f;
-    --blue: #2f6fae;
-    --blue-light: #eef5fb;
-    --text: #243447;
-    --muted: #667085;
-    --border: #d9e1ea;
-    --bg: #f5f7fa;
-    --white: #fff;
-  }
-  * { box-sizing: border-box; }
-  body { margin: 0; font-family: "Segoe UI", Arial, sans-serif; color: var(--text); background: var(--bg); }
-  .page { max-width: 920px; margin: 0 auto; padding: 42px 20px 60px; }
-  .header { margin-bottom: 24px; }
-  .eyebrow { color: var(--blue); font-size: 13px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; margin-bottom: 7px; }
-  h1 { margin: 0; color: var(--navy); font-size: 30px; line-height: 1.2; }
-  .intro { margin: 9px 0 0; color: var(--muted); font-size: 16px; }
-  .controls { background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(31, 58, 95, .05); }
-  label { display: block; font-size: 14px; font-weight: 600; margin-bottom: 7px; color: var(--navy); }
-  input, select { width: 100%; height: 46px; border: 1px solid #cbd5e1; border-radius: 8px; padding: 0 13px; background: #fff; color: var(--text); font: inherit; outline: none; }
-  input:focus, select:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(47,111,174,.12); }
-  .select-label { margin-top: 16px; }
-  .results { margin-top: 22px; }
-  .empty { background: var(--white); border: 1px dashed var(--border); border-radius: 12px; padding: 36px 20px; text-align: center; color: var(--muted); }
-  .result-header { display: flex; justify-content: space-between; align-items: end; gap: 12px; margin-bottom: 12px; }
-  .org-name { margin: 0; color: var(--navy); font-size: 21px; line-height: 1.3; }
-  .count { color: var(--muted); font-size: 14px; white-space: nowrap; }
-  .admins { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
-  .admin { background: var(--white); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; display: flex; align-items: center; gap: 12px; }
-  .avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--blue-light); color: var(--blue); display: grid; place-items: center; flex: 0 0 40px; font-size: 13px; font-weight: 700; }
-  .name { font-size: 16px; font-weight: 600; }
-  .role { color: var(--muted); font-size: 13px; margin-top: 2px; }
-  .super-admin-badge { display: inline-block; margin-top: 6px; padding: 3px 8px; border-radius: 999px; background: #eef2ff; color: #4f46e5; font-size: 11px; font-weight: 700; letter-spacing: .02em; }
-  .error { background: #fff7f7; border: 1px solid #f0caca; color: #a33a3a; border-radius: 12px; padding: 18px; }
-  .footer { margin-top: 24px; color: var(--muted); font-size: 12px; text-align: center; }
-  @media (max-width: 650px) {
-    .page { padding: 28px 14px 45px; }
-    h1 { font-size: 25px; }
-    .admins { grid-template-columns: 1fr; }
-    .result-header { align-items: flex-start; flex-direction: column; }
-  }
+:root{--navy:#1f3a5f;--blue:#2f6fae;--blue-light:#eef5fb;--text:#243447;--muted:#667085;--border:#d9e1ea;--bg:#f5f7fa;--white:#fff}
+*{box-sizing:border-box}body{margin:0;font-family:"Segoe UI",Arial,sans-serif;color:var(--text);background:var(--bg)}
+.page{max-width:920px;margin:0 auto;padding:42px 20px 60px}.header{margin-bottom:24px}
+.eyebrow{color:var(--blue);font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:7px}
+h1{margin:0;color:var(--navy);font-size:30px;line-height:1.2}.intro{margin:9px 0 0;color:var(--muted);font-size:16px}
+.controls{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:20px;box-shadow:0 2px 8px rgba(31,58,95,.05)}
+label{display:block;font-size:14px;font-weight:600;margin-bottom:7px;color:var(--navy)}
+input,select{width:100%;height:46px;border:1px solid #cbd5e1;border-radius:8px;padding:0 13px;background:#fff;color:var(--text);font:inherit;outline:none}
+input:focus,select:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(47,111,174,.12)}.select-label{margin-top:16px}
+.results{margin-top:22px}.empty{background:var(--white);border:1px dashed var(--border);border-radius:12px;padding:36px 20px;text-align:center;color:var(--muted)}
+.result-header{display:flex;justify-content:space-between;align-items:end;gap:12px;margin-bottom:12px}.org-name{margin:0;color:var(--navy);font-size:21px}
+.count{color:var(--muted);font-size:14px;white-space:nowrap}.section-title{margin:20px 0 10px;color:var(--navy);font-size:15px;font-weight:700}
+.section-title.super{margin-top:28px;padding-top:20px;border-top:1px solid var(--border)}
+.admins{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.admin{background:#fff;border:1px solid var(--border);border-radius:10px;padding:14px 16px;display:flex;align-items:center;gap:12px}
+.admin.super{background:#f8f9ff;border-color:#cfd8ff}.avatar{width:40px;height:40px;border-radius:50%;background:var(--blue-light);color:var(--blue);display:grid;place-items:center;flex:0 0 40px;font-size:13px;font-weight:700}
+.name{font-size:16px;font-weight:600}.role{color:var(--muted);font-size:13px;margin-top:2px}.super-admin-badge{display:inline-block;margin-top:6px;padding:3px 8px;border-radius:999px;background:#eef2ff;color:#4f46e5;font-size:11px;font-weight:700}
+.footer{margin-top:24px;color:var(--muted);font-size:12px;text-align:center}@media(max-width:650px){.page{padding:28px 14px 45px}h1{font-size:25px}.admins{grid-template-columns:1fr}.result-header{align-items:flex-start;flex-direction:column}}
 </style>
 </head>
 <body>
 <main class="page">
-  <header class="header">
-    <div class="eyebrow">Dynamic Forms</div>
-    <h1>Admin Directory</h1>
-    <p class="intro">Find the Dynamic Forms administrators assigned to your department or organization.</p>
-  </header>
-
-  <section class="controls">
-    <label for="search">Search departments</label>
-    <input id="search" type="search" placeholder="Start typing a department name..." autocomplete="off">
-
-    <label class="select-label" for="organization">Department / Organization</label>
-    <select id="organization">
-      <option value="">Choose an organization...</option>
-    </select>
-  </section>
-
-  <section id="results" class="results" aria-live="polite">
-    <div class="empty">Select a department above to see its administrators.</div>
-  </section>
-
-  <div class="footer">Dynamic Forms Administrator Directory · Super Admin = more than 20 organizations</div>
+<header class="header"><div class="eyebrow">Dynamic Forms</div><h1>Admin Directory</h1><p class="intro">Find the Dynamic Forms administrators assigned to your department or organization.</p></header>
+<section class="controls">
+<label for="search">Search departments</label><input id="search" type="search" placeholder="Start typing a department name..." autocomplete="off">
+<label class="select-label" for="organization">Department / Organization</label><select id="organization"><option value="">Choose an organization...</option></select>
+</section>
+<section id="results" class="results" aria-live="polite"><div class="empty">Loading administrator directory...</div></section>
+<div class="footer">Dynamic Forms Administrator Directory · Super Admin = more than 20 organizations</div>
 </main>
-
 <script>
-let adminData = {};
-let superAdmins = new Set();
-let organizations = [];
-
-const search = document.getElementById("search");
-const organization = document.getElementById("organization");
-const results = document.getElementById("results");
-
-function escapeHtml(value) {
-  return String(value).replace(/[&<>"']/g, ch => ({
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    '"': "&quot;",
-    "'": "&#39;"
-  }[ch]));
+const search=document.getElementById("search"),organization=document.getElementById("organization"),results=document.getElementById("results");
+let records=[],organizations=[];
+function escapeHtml(v){return String(v).replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]))}
+function parseCSV(text){
+ const rows=[];let row=[],field="",quoted=false;
+ for(let i=0;i<text.length;i++){const ch=text[i],next=text[i+1];
+  if(quoted){if(ch==='"'&&next==='"'){field+='"';i++;}else if(ch==='"')quoted=false;else field+=ch}
+  else{if(ch==='"')quoted=true;else if(ch===','){row.push(field);field=""}else if(ch==='\n'){row.push(field);rows.push(row);row=[];field=""}else if(ch!=='\r')field+=ch}
+ }
+ if(field.length||row.length){row.push(field);rows.push(row)}
+ const headers=rows.shift().map(h=>h.replace(/^\uFEFF/,"").trim());
+ return rows.filter(r=>r.some(v=>String(v).trim())).map(r=>Object.fromEntries(headers.map((h,i)=>[h,(r[i]??"").trim()])));
 }
-
-function initials(person) {
-  return ((person.first || "").charAt(0) + (person.last || "").charAt(0)).toUpperCase();
+function populateOrganizations(filter=""){
+ const q=filter.trim().toLowerCase(),previous=organization.value;
+ organization.innerHTML='<option value="">Choose an organization...</option>';
+ organizations.filter(o=>!q||o.toLowerCase().includes(q)).forEach(org=>{const x=document.createElement("option");x.value=org;x.textContent=org;organization.appendChild(x)});
+ if(previous&&organizations.includes(previous)&&(!q||previous.toLowerCase().includes(q)))organization.value=previous;
 }
-
-async function loadDirectoryData() {
-  const [adminsResponse, superResponse, orgResponse] = await Promise.all([
-    fetch("admins.json", { cache: "no-store" }),
-    fetch("super-admins.json", { cache: "no-store" }),
-    fetch("org-names.json", { cache: "no-store" })
-  ]);
-
-  if (!adminsResponse.ok) throw new Error(`admins.json could not be loaded (${adminsResponse.status})`);
-  if (!superResponse.ok) throw new Error(`super-admins.json could not be loaded (${superResponse.status})`);
-  if (!orgResponse.ok) throw new Error(`org-names.json could not be loaded (${orgResponse.status})`);
-
-  const [data, superList, orgList] = await Promise.all([
-    adminsResponse.json(),
-    superResponse.json(),
-    orgResponse.json()
-  ]);
-
-  adminData = data;
-  superAdmins = new Set(
-    superList.map(name => String(name).trim()).filter(Boolean)
-  );
-
-  organizations = orgList
-    .map(org => String(org).trim())
-    .filter(Boolean)
-    .filter((org, index, list) => list.indexOf(org) === index);
+function showAdmins(org){
+ if(!org){results.innerHTML='<div class="empty">Select a department above to see its administrators.</div>';return}
+ const admins=records.filter(r=>r.OrgName===org).map(r=>({first:r.FirstName,last:r.LastName,superAdmin:String(r.SuperAdmin).toLowerCase()==="yes"}));
+ if(!admins.length){results.innerHTML='<div class="empty">No administrators were found for this organization.</div>';return}
+ admins.sort((a,b)=>a.superAdmin!==b.superAdmin?(a.superAdmin?1:-1):(a.last+" "+a.first).localeCompare(b.last+" "+b.first));
+ const cards=admins.map(p=>`<div class="admin ${p.superAdmin?"super":""}"><div class="avatar">${escapeHtml((p.first[0]||"")+(p.last[0]||""))}</div><div><div class="name">${escapeHtml(p.first+" "+p.last)}</div><div class="role">Dynamic Forms Administrator</div>${p.superAdmin?'<div class="super-admin-badge">Super Admin</div>':""}</div></div>`).join("");
+ const regular=admins.some(p=>!p.superAdmin);
+ const superCount=admins.filter(p=>p.superAdmin).length;
+ results.innerHTML=`<div class="result-header"><h2 class="org-name">${escapeHtml(org)}</h2><div class="count">${admins.length} administrator${admins.length===1?"":"s"}</div></div>${regular?'<div class="section-title">Administrators</div>':""}<div class="admins">${cards}</div>`;
 }
+async function loadCSV(){
+ try{
+  const response=await fetch("admins.csv",{cache:"no-store"});if(!response.ok)throw new Error("admins.csv not found");
+  records=parseCSV(await response.text());
+  const required=["OrgName","FirstName","LastName","SuperAdmin","Active"];
+  if(!records.length||required.some(h=>!(h in records[0])))throw new Error("CSV must contain OrgName, FirstName, LastName, SuperAdmin, and Active columns.");
 
-function populateOrganizations(filter = "") {
-  const query = filter.trim().toLowerCase();
-  const previous = organization.value;
+  // Only Active = Yes users are included in the directory.
+  records=records.filter(r=>String(r.Active).trim().toLowerCase()==="yes");
 
-  organization.innerHTML = '<option value="">Choose an organization...</option>';
-
-  organizations
-    .filter(org => !query || org.toLowerCase().includes(query))
-    .forEach(org => {
-      const option = document.createElement("option");
-      option.value = org;
-      option.textContent = org;
-      organization.appendChild(option);
-    });
-
-  if (
-    previous &&
-    organizations.includes(previous) &&
-    (!query || previous.toLowerCase().includes(query))
-  ) {
-    organization.value = previous;
-  }
+  organizations=[...new Set(records.map(r=>r.OrgName).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
+  populateOrganizations();results.innerHTML='<div class="empty">Select a department above to see its administrators.</div>';
+ }catch(e){console.error(e);results.innerHTML='<div class="empty">Unable to load <strong>admins.csv</strong>. Make sure it is in the same GitHub folder as index.html.</div>'}
 }
-
-function showAdmins(org) {
-  if (!org) {
-    results.innerHTML = '<div class="empty">Select a department above to see its administrators.</div>';
-    return;
-  }
-
-  const entry = adminData[org] || { admins: [], superAdmins: [] };
-
-  // Regular admins first, Super Admins last.
-  const regularAdmins = Array.isArray(entry.admins) ? entry.admins : [];
-  const superAdminPeople = Array.isArray(entry.superAdmins) ? entry.superAdmins : [];
-
-  const sortedRegular = [...regularAdmins].sort((a, b) =>
-    `${a.last} ${a.first}`.localeCompare(`${b.last} ${b.first}`)
-  );
-
-  const sortedSuper = [...superAdminPeople].sort((a, b) =>
-    `${a.last} ${a.first}`.localeCompare(`${b.last} ${b.first}`)
-  );
-
-  const admins = [...sortedRegular, ...sortedSuper];
-
-  if (!admins.length) {
-    results.innerHTML = `
-      <div class="result-header">
-        <h2 class="org-name">${escapeHtml(org)}</h2>
-        <div class="count">0 administrators</div>
-      </div>
-      <div class="empty">No administrators were found for this organization.</div>
-    `;
-    return;
-  }
-
-  const cards = admins.map(person => {
-    const isSuper = superAdmins.has(`${person.first} ${person.last}`) ||
-                    superAdminPeople.some(p => p.first === person.first && p.last === person.last);
-
-    return `
-      <div class="admin">
-        <div class="avatar">${escapeHtml(initials(person))}</div>
-        <div>
-          <div class="name">${escapeHtml(person.first + " " + person.last)}</div>
-          <div class="role">Dynamic Forms Administrator</div>
-          ${isSuper ? '<div class="super-admin-badge">Super Admin</div>' : ''}
-        </div>
-      </div>
-    `;
-  }).join("");
-
-  results.innerHTML = `
-    <div class="result-header">
-      <div><h2 class="org-name">${escapeHtml(org)}</h2></div>
-      <div class="count">${admins.length} administrator${admins.length === 1 ? "" : "s"}</div>
-    </div>
-    <div class="admins">${cards}</div>
-  `;
-}
-
-search.addEventListener("input", () => {
-  populateOrganizations(search.value);
-  if (organization.value) showAdmins(organization.value);
-});
-
-organization.addEventListener("change", () => {
-  showAdmins(organization.value);
-});
-
-// Load all three editable files, then populate the dropdown.
-loadDirectoryData()
-  .then(() => {
-    populateOrganizations();
-  })
-  .catch(error => {
-    console.error(error);
-    results.innerHTML = `
-      <div class="error">
-        <strong>Unable to load the administrator directory.</strong><br>
-        ${escapeHtml(error.message)}
-        <br><br>
-        Make sure <strong>admins.json</strong>, <strong>super-admins.json</strong>,
-        and <strong>org-names.json</strong> are in the same GitHub Pages folder as this file.
-      </div>
-    `;
-  });
+search.addEventListener("input",()=>{populateOrganizations(search.value);if(organization.value)showAdmins(organization.value)});
+organization.addEventListener("change",()=>showAdmins(organization.value));
+loadCSV();
 </script>
 </body>
 </html>
