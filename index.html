@@ -35,19 +35,10 @@ input:focus,select:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(47,1
 .detail-top h2{margin:0;color:var(--navy);font-size:21px}.close-button{border:0;background:#eef2f6;border-radius:8px;width:34px;height:34px;font-size:22px;cursor:pointer;color:var(--text);flex:0 0 auto}
 .detail-email{margin:8px 0 18px;color:var(--muted);overflow-wrap:anywhere}
 .detail-label{font-size:13px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);font-weight:700;margin-bottom:8px}
-.permission-list{display:flex;flex-wrap:wrap;gap:7px;margin:0;padding:0;list-style:none}
-.permission-list li{background:var(--blue-light);border:1px solid #d5e6f7;color:var(--navy);font-size:13px;padding:6px 9px;border-radius:7px;overflow-wrap:anywhere}
+.permission-list{display:flex;flex-wrap:wrap;gap:8px;margin:0;padding:0;list-style:none}
+.permission-list li{display:flex;align-items:center;gap:9px;background:#fff;border:1px solid var(--border);color:var(--navy);font-size:13px;font-weight:700;padding:9px 11px;border-radius:9px;overflow-wrap:anywhere}
+.permission-list input[type=checkbox]{width:16px;height:16px;flex:0 0 16px;margin:0;accent-color:var(--blue);pointer-events:none}
 .permission-count{font-size:13px;color:var(--muted);margin-top:14px}
-.permission-groups{display:grid;gap:12px;margin-top:10px}
-.permission-group{border:1px solid var(--border);border-radius:9px;padding:11px 12px;background:#fff}
-.permission-group-title{display:flex;align-items:center;gap:9px;font-weight:700;color:var(--navy);font-size:14px;margin:0 0 8px}
-.permission-items{display:grid;gap:8px;margin-left:3px}
-.permission-item{display:flex;align-items:flex-start;gap:9px;font-size:13px;color:var(--text);margin:0;line-height:1.4}
-.permission-item input[type=checkbox]{width:16px;height:16px;flex:0 0 16px;margin:1px 0 0;accent-color:var(--blue);pointer-events:none}
-.permission-item.unassigned{color:#7b8794}
-.permission-item.unassigned input{accent-color:#cbd5e1}
-.permission-status{font-size:11px;margin-left:auto;font-weight:600;color:var(--muted)}
-.permission-group-title input[type=checkbox]{width:16px;height:16px;margin:0;accent-color:var(--blue);pointer-events:none}
 .permission-note{font-size:12px;color:var(--muted);margin:12px 0 0}
 @media(max-width:650px){.page{padding:28px 14px 45px}h1{font-size:25px}.admins{grid-template-columns:1fr}.result-header{align-items:flex-start;flex-direction:column}}
 </style>
@@ -238,88 +229,50 @@ function openAdminDetails(person, org) {
   detailEmail.textContent = person.email || "Email not available";
   permissionList.innerHTML = "";
 
-  // Only show the permission groups/items highlighted in the user's screenshot.
-  // The API export uses permission codes, which are mapped to readable labels here.
+  // Display each highlighted permission category only once.
+  // A category is checked if the CSV contains at least one permission code belonging to it.
   const permissionGroups = [
     {
       title: "Form Review",
-      items: [
-        { label: "View form data", codes: ["ViewFormData"] },
-        { label: "Complete school section", codes: ["CompleteSchoolSection"] },
-        { label: "Manage Cosigners", codes: ["ViewCosignerInfo", "EditCosignerInfo", "OverrideCosignerFromEvent", "ResendCosignerNotifications"] },
-        { label: "Change Form Status", codes: ["ProcessForms", "RejectForms", "UnprocessForms", "UndeleteForms", "ArchiveForms"] }
-      ]
+      codes: ["ViewFormData", "CompleteSchoolSection", "ViewCosignerInfo", "EditCosignerInfo", "OverrideCosignerFromEvent", "ResendCosignerNotifications", "ProcessForms", "RejectForms", "UnprocessForms", "UndeleteForms", "ArchiveForms"]
     },
     {
       title: "File attachments",
-      items: [
-        { label: "File attachments", codes: ["ViewFileAttachments", "DownloadFileAttachments"] }
-      ]
+      codes: ["ViewFileAttachments", "DownloadFileAttachments"]
     },
     {
       title: "Form Design",
-      items: [
-        { label: "Form Design", codes: ["EditFormTemplates", "EditLiveFormTemplates", "ActivateFormTemplates", "DeleteFormTemplates", "ManageSharedFormTemplates"] }
-      ]
+      codes: ["EditFormTemplates", "EditLiveFormTemplates", "ActivateFormTemplates", "DeleteFormTemplates", "ManageSharedFormTemplates"]
     },
     {
       title: "DFE",
-      items: [
-        { label: "DFE access", codes: ["DfeAccess"] }
-      ]
+      codes: ["DfeAccess"]
     }
   ];
 
   const assigned = new Set([...person.permissions].map(normalize));
-  let checkedCount = 0;
-  let shownCount = 0;
+  const assignedGroups = permissionGroups.filter(group => group.codes.some(code => assigned.has(normalize(code))));
 
-  permissionGroups.forEach(group => {
-    const groupBox = document.createElement("section");
-    groupBox.className = "permission-group";
-    const assignedItems = group.items.filter(item => item.codes.some(code => assigned.has(normalize(code))));
-    if (!assignedItems.length) return;
-    const groupChecked = true;
-    const groupTitle = document.createElement("div");
-    groupTitle.className = "permission-group-title";
-    const groupCheckbox = document.createElement("input");
-    groupCheckbox.type = "checkbox";
-    groupCheckbox.checked = groupChecked;
-    groupCheckbox.tabIndex = -1;
-    groupCheckbox.setAttribute("aria-label", `${group.title} permission present`);
-    const titleText = document.createElement("span");
-    titleText.textContent = group.title;
-    groupTitle.append(groupCheckbox, titleText);
-    groupBox.appendChild(groupTitle);
-
-    const itemContainer = document.createElement("div");
-    itemContainer.className = "permission-items";
-    assignedItems.forEach(item => {
-      shownCount++;
-      checkedCount++;
-      const label = document.createElement("label");
-      label.className = "permission-item";
-      const checkbox = document.createElement("input");
-      checkbox.type = "checkbox";
-      checkbox.checked = true;
-      checkbox.tabIndex = -1;
-      checkbox.setAttribute("aria-label", `${item.label}: assigned`);
-      const text = document.createElement("span");
-      text.textContent = item.label;
-      label.append(checkbox, text);
-      itemContainer.appendChild(label);
-    });
-    groupBox.appendChild(itemContainer);
-    permissionList.appendChild(groupBox);
+  assignedGroups.forEach(group => {
+    const item = document.createElement("li");
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.checked = true;
+    checkbox.tabIndex = -1;
+    checkbox.setAttribute("aria-label", `${group.title}: assigned`);
+    const text = document.createElement("span");
+    text.textContent = group.title;
+    item.append(checkbox, text);
+    permissionList.appendChild(item);
   });
 
-  if (!checkedCount) {
+  if (!assignedGroups.length) {
     const message = document.createElement("p");
     message.className = "permission-note";
     message.textContent = "No highlighted permissions were found for this administrator in this organization.";
     permissionList.appendChild(message);
   }
-  permissionCount.textContent = `${checkedCount} highlighted permission item${checkedCount === 1 ? "" : "s"} assigned for ${org}.`;
+  permissionCount.textContent = `${assignedGroups.length} highlighted permission categor${assignedGroups.length === 1 ? "y" : "ies"} assigned for ${org}.`;
   modal.hidden = false;
   closeModalButton.focus();
 }
