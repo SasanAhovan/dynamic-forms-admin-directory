@@ -116,8 +116,8 @@ function showAdmins(org){
 
 async function loadCSV(){
   try{
-    const response=await fetch("admins.csv",{cache:"no-store"});
-    if(!response.ok)throw new Error("admins.csv not found");
+    const response=await fetch("results.csv",{cache:"no-store"});
+    if(!response.ok)throw new Error("results.csv not found");
 
     records=parseCSV(await response.text());
 
@@ -136,7 +136,7 @@ async function loadCSV(){
     results.innerHTML='<div class="empty">Select a department above to see its administrators.</div>';
   }catch(e){
     console.error(e);
-    results.innerHTML='<div class="empty">Unable to load <strong>admins.csv</strong>. Make sure it is in the same GitHub folder as index.html.</div>';
+    results.innerHTML='<div class="empty">Unable to load <strong>results.csv</strong>. Make sure it is in the same GitHub folder as index.html.</div>';
   }
 }
 
