@@ -13,6 +13,14 @@ body{margin:0;font-family:"Segoe UI",Arial,sans-serif;color:var(--text);backgrou
 h1{margin:0;color:var(--navy);font-size:30px;line-height:1.2}
 .intro{margin:9px 0 0;color:var(--muted);font-size:16px}
 .controls{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:20px;box-shadow:0 2px 8px rgba(31,58,95,.05)}
+.search-mode{display:flex;gap:6px;padding:5px;background:#edf2f7;border-radius:10px;margin-bottom:18px}
+.search-mode button{flex:1;border:1px solid transparent;border-radius:7px;background:transparent;color:var(--muted);padding:10px 12px;font:inherit;font-weight:700;cursor:pointer}
+.search-mode button[aria-pressed="true"]{background:#fff;color:var(--navy);border-color:var(--border);box-shadow:0 1px 3px rgba(31,58,95,.08)}
+.search-mode button:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.admin-search-results{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.admin-orgs{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.admin-org-chip{display:inline-block;background:var(--blue-light);border:1px solid var(--border);color:var(--navy);border-radius:6px;padding:4px 7px;font-size:12px}
+@media(max-width:650px){.admin-search-results{grid-template-columns:1fr}}
 label{display:block;font-size:14px;font-weight:600;margin-bottom:7px;color:var(--navy)}
 input,select{width:100%;height:46px;border:1px solid #cbd5e1;border-radius:8px;padding:0 13px;background:#fff;color:var(--text);font:inherit;outline:none}
 input:focus,select:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(47,111,174,.12)}
@@ -68,12 +76,23 @@ input:focus,select:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(47,1
     <p class="intro">Find active Dynamic Forms administrators assigned to your department or organization. Select an administrator to view their permissions.</p>
   </header>
   <section class="controls">
-    <label for="search">Search departments</label>
-    <input id="search" type="search" placeholder="Start typing a department name..." autocomplete="off" aria-describedby="orgSearchHelp">
-    <div id="orgSuggestions" class="org-suggestions" role="listbox" aria-label="Matching organizations"></div>
-    <div id="orgSearchHelp" class="permission-note">Matching organizations will appear here as you type.</div>
-    <label class="select-label" for="organization">Department / Organization</label>
-    <select id="organization"><option value="">Choose an organization...</option></select>
+    <div class="search-mode" role="group" aria-label="Choose search type">
+      <button id="searchByOrg" type="button" aria-pressed="true">Search by Department</button>
+      <button id="searchByAdmin" type="button" aria-pressed="false">Search by Admin</button>
+    </div>
+    <div id="orgSearchPanel">
+      <label for="search">Search departments</label>
+      <input id="search" type="search" placeholder="Start typing a department name..." autocomplete="off" aria-describedby="orgSearchHelp">
+      <div id="orgSuggestions" class="org-suggestions" role="listbox" aria-label="Matching organizations"></div>
+      <div id="orgSearchHelp" class="permission-note">Matching organizations will appear here as you type.</div>
+      <label class="select-label" for="organization">Department / Organization</label>
+      <select id="organization"><option value="">Choose an organization...</option></select>
+    </div>
+    <div id="adminSearchPanel" hidden>
+      <label for="adminSearch">Search administrators</label>
+      <input id="adminSearch" type="search" placeholder="Enter first name, last name, or email..." autocomplete="off" aria-describedby="adminSearchHelp">
+      <div id="adminSearchHelp" class="permission-note">Results update as you type. You can search by first name, last name, or email.</div>
+    </div>
   </section>
   <section id="results" class="results" aria-live="polite"><div class="empty">Loading administrator directory...</div></section>
   <div class="footer">Dynamic Forms Administrator Directory</div>
@@ -103,6 +122,12 @@ const PERMISSIONS_CSV = "Admin%20Report%20-%20Permissions%20and%20Orgs.csv";
 const MAX_ORGANIZATIONS_PER_ADMIN = 9; // Show admins assigned to fewer than 10 distinct organizations.
 
 const search = document.getElementById("search");
+const adminSearch = document.getElementById("adminSearch");
+const searchByOrgButton = document.getElementById("searchByOrg");
+const searchByAdminButton = document.getElementById("searchByAdmin");
+const orgSearchPanel = document.getElementById("orgSearchPanel");
+const adminSearchPanel = document.getElementById("adminSearchPanel");
+let searchMode = "org";
 const organization = document.getElementById("organization");
 const results = document.getElementById("results");
 const orgSuggestions = document.getElementById("orgSuggestions");
@@ -298,6 +323,126 @@ function showAdmins(org) {
     });
   });
 }
+function getAdminSearchRecords() {
+  const activeUsersByEmail = new Map(
+    users.filter(user => normalize(user.Active) === "active")
+      .map(user => [normalize(user.Email), user])
+      .filter(([email]) => email)
+  );
+  const byEmail = new Map();
+
+  permissionRecords.forEach(row => {
+    const email = normalize(row.email);
+    const user = activeUsersByEmail.get(email);
+    if (!email || !user) return;
+    const orgCount = orgCountByEmail.get(email)?.size || 0;
+    if (orgCount > MAX_ORGANIZATIONS_PER_ADMIN) return;
+
+    if (!byEmail.has(email)) {
+      byEmail.set(email, {
+        first: user.FirstName || row.firstname || "",
+        last: user.LastName || row.lastname || "",
+        email: user.Email || row.email || "",
+        orgs: new Set(),
+        permissionsByOrg: new Map()
+      });
+    }
+    const person = byEmail.get(email);
+    const orgName = String(row.OrgName || "").trim();
+    if (orgName) {
+      person.orgs.add(orgName);
+      if (!person.permissionsByOrg.has(orgName)) person.permissionsByOrg.set(orgName, new Set());
+      const permissionName = String(row.PermissionName || "").trim();
+      if (permissionName) person.permissionsByOrg.get(orgName).add(permissionName);
+    }
+  });
+
+  return [...byEmail.values()].map(person => ({
+    ...person,
+    orgs: [...person.orgs].sort((a, b) => a.localeCompare(b))
+  })).sort((a, b) => (a.last + " " + a.first).localeCompare(b.last + " " + b.first));
+}
+
+function showAdminSearchResults(query) {
+  const normalizedQuery = normalize(query);
+  if (!normalizedQuery) {
+    results.innerHTML = '<div class="empty">Search by an administrator’s first name, last name, or email to see matching users.</div>';
+    return;
+  }
+
+  const matches = getAdminSearchRecords().filter(person => {
+    const searchable = normalize(`${person.first} ${person.last} ${person.email}`);
+    return normalizedQuery.split(/\s+/).every(word => searchable.includes(word));
+  });
+
+  if (!matches.length) {
+    results.innerHTML = '<div class="empty">No administrators match “' + escapeHtml(query.trim()) + '”. Try another name or email.</div>';
+    return;
+  }
+
+  const cards = matches.map(person => {
+    const visibleOrgs = person.orgs.slice(0, 4);
+    const orgChips = visibleOrgs.map(org => `<span class="admin-org-chip">${escapeHtml(org)}</span>`).join("");
+    const more = person.orgs.length > 4 ? `<span class="admin-org-chip">+${person.orgs.length - 4} more</span>` : "";
+    return `
+      <button type="button" class="admin admin-search-card" data-email="${escapeHtml(normalize(person.email))}">
+        <span class="avatar" aria-hidden="true">${escapeHtml(initials(person.first, person.last))}</span>
+        <span class="admin-copy">
+          <span class="name">${escapeHtml((person.first + " " + person.last).trim() || person.email)}</span>
+          <span class="role">${escapeHtml(person.email)}</span>
+          <span class="click-hint">${person.orgs.length} organization${person.orgs.length === 1 ? "" : "s"} · View details</span>
+          <span class="admin-orgs">${orgChips}${more}</span>
+        </span>
+      </button>`;
+  }).join("");
+
+  results.innerHTML = `
+    <div class="result-header">
+      <h2 class="org-name">Administrators</h2>
+      <div class="count">${matches.length} matching administrator${matches.length === 1 ? "" : "s"}</div>
+    </div>
+    <div class="admin-search-results">${cards}</div>`;
+
+  results.querySelectorAll(".admin-search-card[data-email]").forEach(button => {
+    button.addEventListener("click", () => {
+      const person = matches.find(item => normalize(item.email) === button.dataset.email);
+      if (!person) return;
+      const firstOrg = person.orgs[0];
+      if (firstOrg) {
+        const modalPerson = {
+          first: person.first,
+          last: person.last,
+          email: person.email,
+          permissions: person.permissionsByOrg.get(firstOrg) || new Set()
+        };
+        openAdminDetails(modalPerson, firstOrg);
+      }
+    });
+  });
+}
+
+function setSearchMode(mode) {
+  searchMode = mode;
+  const isOrg = mode === "org";
+  searchByOrgButton.setAttribute("aria-pressed", String(isOrg));
+  searchByAdminButton.setAttribute("aria-pressed", String(!isOrg));
+  orgSearchPanel.hidden = !isOrg;
+  adminSearchPanel.hidden = isOrg;
+  orgSuggestions.classList.remove("visible");
+  if (isOrg) {
+    results.innerHTML = '<div class="empty">Search for an organization or choose one from the dropdown to see its administrators.</div>';
+    search.focus();
+  } else {
+    results.innerHTML = '<div class="empty">Search by an administrator’s first name, last name, or email to see matching users.</div>';
+    adminSearch.focus();
+    if (adminSearch.value.trim()) showAdminSearchResults(adminSearch.value);
+  }
+}
+
+searchByOrgButton.addEventListener("click", () => setSearchMode("org"));
+searchByAdminButton.addEventListener("click", () => setSearchMode("admin"));
+adminSearch.addEventListener("input", () => showAdminSearchResults(adminSearch.value));
+
 function openAdminDetails(person, org) {
   lastFocusedElement = document.activeElement;
   detailName.textContent = (person.first + " " + person.last).trim() || "Administrator details";
@@ -434,6 +579,7 @@ function openAdminDetails(person, org) {
       link.textContent = otherOrg;
       link.addEventListener("click", () => {
         closeModal();
+        setSearchMode("org");
         search.value = otherOrg;
         populateOrganizations(otherOrg);
         orgSuggestions.classList.remove("visible");
