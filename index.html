@@ -17,6 +17,13 @@ label{display:block;font-size:14px;font-weight:600;margin-bottom:7px;color:var(-
 input,select{width:100%;height:46px;border:1px solid #cbd5e1;border-radius:8px;padding:0 13px;background:#fff;color:var(--text);font:inherit;outline:none}
 input:focus,select:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(47,111,174,.12)}
 .select-label{margin-top:16px}
+.org-suggestions{display:none;margin-top:8px;border:1px solid var(--border);border-radius:9px;background:#fff;overflow:hidden}
+.org-suggestions.visible{display:block}
+.org-suggestions-label{padding:9px 12px 6px;color:var(--muted);font-size:12px;font-weight:700}
+.org-suggestion{display:block;width:100%;padding:10px 12px;border:0;border-top:1px solid #edf0f4;background:#fff;text-align:left;font:inherit;color:var(--text);cursor:pointer}
+.org-suggestion:hover,.org-suggestion:focus-visible{background:var(--blue-light);outline:none;color:var(--navy)}
+.org-suggestion strong{color:var(--navy)}
+.org-no-match{padding:10px 12px;color:var(--muted);font-size:13px}
 .results{margin-top:22px}.empty{background:var(--white);border:1px dashed var(--border);border-radius:12px;padding:36px 20px;text-align:center;color:var(--muted)}
 .result-header{display:flex;justify-content:space-between;align-items:end;gap:12px;margin-bottom:12px}
 .org-name{margin:0;color:var(--navy);font-size:21px}.count{color:var(--muted);font-size:14px;white-space:nowrap}
@@ -37,6 +44,9 @@ input:focus,select:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(47,1
 .detail-label{font-size:13px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);font-weight:700;margin-bottom:8px}
 .permission-list{display:flex;flex-wrap:wrap;gap:8px;margin:0;padding:0;list-style:none}
 .permission-list li{display:flex;align-items:center;gap:9px;background:#fff;border:1px solid var(--border);color:var(--navy);font-size:13px;font-weight:700;padding:9px 11px;border-radius:9px;overflow-wrap:anywhere}
+.permission-list li.permission-warning{background:#fee2e2;border-color:#ef4444;color:#991b1b;cursor:help}
+.permission-list li.permission-warning input[type=checkbox]{accent-color:#b91c1c}
+.permission-list li.permission-warning:hover{background:#fecaca;border-color:#dc2626}
 .permission-list input[type=checkbox]{width:16px;height:16px;flex:0 0 16px;margin:0;accent-color:var(--blue);pointer-events:none}
 .permission-count{font-size:13px;color:var(--muted);margin-top:14px}
 .permission-note{font-size:12px;color:var(--muted);margin:12px 0 0}
@@ -52,7 +62,9 @@ input:focus,select:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(47,1
   </header>
   <section class="controls">
     <label for="search">Search departments</label>
-    <input id="search" type="search" placeholder="Start typing a department name..." autocomplete="off">
+    <input id="search" type="search" placeholder="Start typing a department name..." autocomplete="off" aria-describedby="orgSearchHelp">
+    <div id="orgSuggestions" class="org-suggestions" role="listbox" aria-label="Matching organizations"></div>
+    <div id="orgSearchHelp" class="permission-note">Matching organizations will appear here as you type.</div>
     <label class="select-label" for="organization">Department / Organization</label>
     <select id="organization"><option value="">Choose an organization...</option></select>
   </section>
@@ -81,6 +93,7 @@ const MAX_ORGANIZATIONS_PER_ADMIN = 9; // Show admins assigned to fewer than 10 
 const search = document.getElementById("search");
 const organization = document.getElementById("organization");
 const results = document.getElementById("results");
+const orgSuggestions = document.getElementById("orgSuggestions");
 const modal = document.getElementById("adminModal");
 const closeModalButton = document.getElementById("closeModal");
 const detailName = document.getElementById("detailName");
@@ -154,6 +167,53 @@ function populateOrganizations(filter = "") {
     organization.value = previous;
   }
 }
+function renderOrganizationSuggestions(filter = "") {
+  const query = filter.trim().toLowerCase();
+  orgSuggestions.innerHTML = "";
+  if (!query) {
+    orgSuggestions.classList.remove("visible");
+    return;
+  }
+
+  const matches = organizations.filter(org => org.toLowerCase().includes(query));
+  orgSuggestions.classList.add("visible");
+
+  if (!matches.length) {
+    orgSuggestions.innerHTML = '<div class="org-no-match">No matching organizations found.</div>';
+    return;
+  }
+
+  const label = document.createElement("div");
+  label.className = "org-suggestions-label";
+  label.textContent = `${matches.length} matching organization${matches.length === 1 ? "" : "s"} — select one to view admins`;
+  orgSuggestions.appendChild(label);
+
+  // Keep the suggestion list compact when a broad keyword matches many organizations.
+  matches.slice(0, 12).forEach(org => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "org-suggestion";
+    button.setAttribute("role", "option");
+    button.textContent = org;
+    button.addEventListener("click", () => {
+      organization.value = org;
+      search.value = org;
+      populateOrganizations(org);
+      orgSuggestions.classList.remove("visible");
+      orgSuggestions.innerHTML = "";
+      showAdmins(org);
+    });
+    orgSuggestions.appendChild(button);
+  });
+
+  if (matches.length > 12) {
+    const more = document.createElement("div");
+    more.className = "org-no-match";
+    more.textContent = `Showing 12 of ${matches.length} matches. Type more to narrow your search.`;
+    orgSuggestions.appendChild(more);
+  }
+}
+
 function showAdmins(org) {
   if (!org) {
     results.innerHTML = '<div class="empty">Select a department above to see its administrators.</div>';
@@ -308,6 +368,11 @@ function openAdminDetails(person, org) {
 
     sectionItems.forEach(permission => {
       const item = document.createElement("li");
+      if (permission.title === "Edit live form templates") {
+        item.classList.add("permission-warning");
+        item.title = "Caution: Editing live forms can affect received applications.";
+        item.setAttribute("aria-label", "Edit live form templates. Caution: Editing live forms can affect received applications.");
+      }
       const checkbox = document.createElement("input");
       checkbox.type = "checkbox";
       checkbox.checked = true;
@@ -383,13 +448,41 @@ async function loadCSVs() {
   }
 }
 search.addEventListener("input", () => {
-  const selected = organization.value;
   populateOrganizations(search.value);
-  if (selected && organization.value === selected) showAdmins(selected);
-  else if (organization.value) showAdmins(organization.value);
-  else results.innerHTML = '<div class="empty">Choose an organization from the filtered list to see its administrators.</div>';
+  renderOrganizationSuggestions(search.value);
+  const query = normalize(search.value);
+  if (!query) {
+    organization.value = "";
+    results.innerHTML = '<div class="empty">Search for an organization or choose one from the dropdown to see its administrators.</div>';
+    return;
+  }
+
+  // If the search exactly matches an organization, show its administrators immediately.
+  const exactMatch = organizations.find(org => normalize(org) === query);
+  if (exactMatch) {
+    organization.value = exactMatch;
+    orgSuggestions.classList.remove("visible");
+    showAdmins(exactMatch);
+  } else {
+    organization.value = "";
+    results.innerHTML = '<div class="empty">Select a matching organization from the suggestions above to see its administrators.</div>';
+  }
 });
-organization.addEventListener("change", () => showAdmins(organization.value));
+organization.addEventListener("change", () => {
+  if (organization.value) {
+    search.value = organization.value;
+    orgSuggestions.classList.remove("visible");
+    showAdmins(organization.value);
+  } else {
+    results.innerHTML = '<div class="empty">Select a department above to see its administrators.</div>';
+  }
+});
+
+document.addEventListener("click", event => {
+  if (!orgSuggestions.contains(event.target) && event.target !== search) {
+    orgSuggestions.classList.remove("visible");
+  }
+});
 loadCSVs();
 </script>
 </body>
