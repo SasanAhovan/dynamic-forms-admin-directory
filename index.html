@@ -51,6 +51,7 @@ input:focus,select:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(47,1
 .permission-count{font-size:13px;color:var(--muted);margin-top:14px}
 .permission-note{font-size:12px;color:var(--muted);margin:12px 0 0}
 .other-orgs{margin-top:22px;padding-top:16px;border-top:1px solid var(--border)}
+.other-orgs[hidden]{display:none}
 .other-orgs h3{margin:0 0 10px;color:var(--navy);font-size:14px}
 .other-org-list{display:flex;flex-wrap:wrap;gap:8px}
 .other-org-link{border:1px solid var(--border);background:var(--blue-light);color:var(--navy);border-radius:8px;padding:8px 10px;font:inherit;font-size:13px;text-align:left;cursor:pointer;max-width:100%;overflow-wrap:anywhere}
@@ -88,7 +89,7 @@ input:focus,select:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(47,1
     <div class="detail-label">Permissions for this organization</div>
     <ul id="permissionList" class="permission-list"></ul>
     <p id="permissionCount" class="permission-count"></p>
-    <section class="other-orgs" aria-labelledby="otherOrgsHeading">
+    <section id="otherOrgsSection" class="other-orgs" aria-labelledby="otherOrgsHeading" hidden>
       <h3 id="otherOrgsHeading">Other organizations this administrator can access</h3>
       <p id="otherOrgsCurrent" class="other-org-current"></p>
       <div id="otherOrgList" class="other-org-list"></div>
@@ -112,6 +113,7 @@ const detailEmail = document.getElementById("detailEmail");
 const permissionList = document.getElementById("permissionList");
 const permissionCount = document.getElementById("permissionCount");
 const otherOrgList = document.getElementById("otherOrgList");
+const otherOrgsSection = document.getElementById("otherOrgsSection");
 const otherOrgsCurrent = document.getElementById("otherOrgsCurrent");
 
 let users = [];
@@ -421,6 +423,8 @@ function openAdminDetails(person, org) {
     .filter(name => name && normalize(name) !== normalize(org)))]
     .sort((a, b) => a.localeCompare(b));
 
+  // Hide the entire section when this administrator has no other organizations.
+  otherOrgsSection.hidden = otherOrgs.length === 0;
   otherOrgsCurrent.textContent = `Currently viewing: ${org}`;
   if (otherOrgs.length) {
     otherOrgs.forEach(otherOrg => {
@@ -439,11 +443,6 @@ function openAdminDetails(person, org) {
       });
       otherOrgList.appendChild(link);
     });
-  } else {
-    const message = document.createElement("p");
-    message.className = "permission-note";
-    message.textContent = "No other organization assignments were found for this administrator.";
-    otherOrgList.appendChild(message);
   }
   modal.hidden = false;
   closeModalButton.focus();
